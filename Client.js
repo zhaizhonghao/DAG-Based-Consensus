@@ -12,14 +12,11 @@ class Client {
     }
     async init(){
        this.gossipNode = await this.createNode();
-       console.log('1');
     }
 
     async createNode() {
-      console.log('2');
         const peerInfo = await PeerInfo.create()
         peerInfo.multiaddrs.add('/ip4/0.0.0.0/tcp/0')
-        console.log('3');
         const node = await Libp2p.create({
           peerInfo,
           modules: {
@@ -40,9 +37,7 @@ class Client {
               }
             }
         })
-        console.log('4');
         await node.start()
-        console.log('5');
         return node
     }
     getPeerInfo(){
@@ -52,7 +47,6 @@ class Client {
       this.gossipNode.dial(peerInfo);
     }
     subscribe(topic){
-      console.log('sub');
       this.gossipNode.pubsub.subscribe(topic,(msg)=>{
         var record = `received: ${msg.data.toString()} from ${msg.from}\n`;
         fs.appendFile(`${__dirname}/db/${this.gossipNode.peerInfo.id.toB58String()}.txt`,record , (error)  => {
@@ -61,14 +55,14 @@ class Client {
           });
       });
     }
-    publish(topic){
+    publish(topic,interval){
       let counter = 0;
       setInterval(() => {
         counter++;
         this.gossipNode.pubsub.publish(topic, Buffer.from('message '+counter))
-        console.log(counter);
-      }, 1000)
+      }, interval)
     }
+
     isStarted(){
       return this.gossipNode.isStarted();
     }
