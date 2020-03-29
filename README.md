@@ -15,13 +15,13 @@ a p2p network with 6 normal nodes and 2 byzantine node
 
 ## Data structure
 The structure of msg exchanged between nodes
-`{
+```{
   from: 'QmTUnVs1EkAmCz78CXeytAiU5YXc9hHwub8ZdkE7fxWoQW',
   data: <Buffer 6d 65 73 73 61 67 65 20 33>,
   seqno: <Buffer 12 14 21 66 10 42 f8 4d>,
   topicIDs: [ 'news' ],
   signature: <Buffer 4b ef 4c 66 29 31 3e f3 51 ab c9 f8 4b 81 23 51 a1 2e 02 5e 59 bd 28 23 9b 7a f7 4c 29 ba 83 53 cf 2c 36 ff 7c 1a 26 d1 3c 5c e1 ab e3 bf da 79 9b eb ... 206 more bytes>,
   key: <Buffer 08 00 12 a6 02 30 82 01 22 30 0d 06 09 2a 86 48 86 f7 0d 01 01 01 05 00 03 82 01 0f 00 30 82 01 0a 02 82 01 01 00 a9 0d 66 8f 16 9c 8d d4 2b 4d 43 b2 ... 249 more bytes>
-}`
+}```
 we can use msg.data.toString() to check the content of msg, and use msg.from to get the sender.
 
