@@ -11,7 +11,7 @@ const NUM_OF_SIMPLE_CLIENT = 2;
         console.log(`client ${client.getPeerInfo().id.toB58String()} is start : ${client.isStarted()}`);
         superClients.push(client);
     }
-    //create n simple nodes
+    //create 2 simple nodes
     var clients = []
     for (let i = 0; i < NUM_OF_SIMPLE_CLIENT; i++) {
         let client = new Client.Client(); 

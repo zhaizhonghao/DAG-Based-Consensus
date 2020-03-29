@@ -10,6 +10,7 @@ var fs = require('fs')
 class Client {
     constructor(){
     }
+
     async init(){
        this.gossipNode = await this.createNode();
     }
@@ -66,7 +67,6 @@ class Client {
     isStarted(){
       return this.gossipNode.isStarted();
     }
-    
 }
 
 exports.Client = Client;
