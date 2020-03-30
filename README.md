@@ -26,4 +26,7 @@ The structure of msg exchanged between nodes
 }
 ```
 we can use msg.data.toString() to check the content of msg, and use msg.from to get the sender.
+## Database 
+Since our algorithm is based on graph theory, we consider using the graph database--neo4j.
+
 

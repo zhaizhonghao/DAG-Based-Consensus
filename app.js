@@ -1,4 +1,4 @@
-const Client = require('./Client');
+const Client = require('./modules/Client');
 const NUM_OF_SUPER_CLIENT = 2;
 const NUM_OF_SIMPLE_CLIENT = 2;
 

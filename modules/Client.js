@@ -41,12 +41,15 @@ class Client {
         await node.start()
         return node
     }
+    
     getPeerInfo(){
       return this.gossipNode.peerInfo;
     }
+
     dial(peerInfo){
       this.gossipNode.dial(peerInfo);
     }
+
     subscribe(topic){
       this.gossipNode.pubsub.subscribe(topic,(msg)=>{
         var record = `received: ${msg.data.toString()} from ${msg.from}\n`;
@@ -56,6 +59,7 @@ class Client {
           });
       });
     }
+
     publish(topic,interval){
       let counter = 0;
       setInterval(() => {
