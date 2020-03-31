@@ -28,5 +28,33 @@ The structure of msg exchanged between nodes
 we can use msg.data.toString() to check the content of msg, and use msg.from to get the sender.
 ## Database 
 Since our algorithm is based on graph theory, we consider using the graph database--neo4j.
+### Interaction the neo4j with RESTful API
+
+### Commands can be used
+* Count all the nodes in the graph
+```
+match(x) return count(x)
+```
+* Create the node with properties, for example
+```
+MATCH (ee:Person) WHERE ee.name = "Emil" RETURN ee;
+```
+* Create the nodes and edges with properties, for example
+```
+MATCH (ee:Person) WHERE ee.name = "Emil"
+CREATE (js:Person { name: "Johan", from: "Sweden", learn: "surfing" }),
+(ir:Person { name: "Ian", from: "England", title: "author" }),
+(rvb:Person { name: "Rik", from: "Belgium", pet: "Orval" }),
+(ally:Person { name: "Allison", from: "California", hobby: "surfing" }),
+(ee)-[:KNOWS {since: 2001}]->(js),(ee)-[:KNOWS {rating: 5}]->(ir),
+(js)-[:KNOWS]->(ir),(js)-[:KNOWS]->(rvb),
+(ir)-[:KNOWS]->(js),(ir)-[:KNOWS]->(ally),
+(rvb)-[:KNOWS]->(ally)
+```
+* Find the the node with specific properties
+
+* Find the double spend node
+
+* Check if the node can the some nodes 
 
 
