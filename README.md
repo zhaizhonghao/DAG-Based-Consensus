@@ -66,7 +66,7 @@ match(x) return count(x)
 ```
 * Create the node with properties, for example
 ```
-MATCH (ee:Person) WHERE ee.name = "Emil" RETURN ee;
+CREATE (js:Person { name: "Johan", from: "Sweden", learn: "surfing" })
 ```
 * Create the nodes and edges with properties, for example
 ```
@@ -80,12 +80,28 @@ CREATE (js:Person { name: "Johan", from: "Sweden", learn: "surfing" }),
 (ir)-[:KNOWS]->(js),(ir)-[:KNOWS]->(ally),
 (rvb)-[:KNOWS]->(ally)
 ```
-* Find the the node with specific properties
-TODO
+* Find the the node with specific properties, for example
+```
+MATCH(ee:Person) WHERE ee.from='England' return ee
+```
+* Count the node with specific label
+```
+match(x) where labels(x)=['Person'] return count(x)
+```
 * Find the double spend node
 TODO
 * Check if the node can see some nodes 
-
+```
+match (x:Event),(y:Event),p=(x)-[*]->(y) where id(x)=3 and id(y)=0 return count(p)
+```
+if return 0, it means x has no path to y
+otherwise, it means x has a path to y
+* Create the node and connect to the existing node with specific properties, for example
+```
+match (x:Event) where id(x)=3
+create (y:Event{data:'Data4'}),(y)-[:FROM]->(x)
+return y
+```
 
 ## TODO LIST
 1. p2p network with 100 nodes (completed)
