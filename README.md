@@ -2,18 +2,45 @@
 ## Client
 this a p2p node based on libp2p
 ## Design Plan
-* STEP 1 
-a p2p network with 2 normal nodes and 1 byzantine node
-* STEP 2
-a p2p network with 6 normal nodes and 2 byzantine node
-## TODO LIST
-1. p2p network with 100 nodes (completed)
-2. every node can publish and subscribe msgs at the same time (completed)
-3. draw the directed-acyclic-graph with the log of one node 
-3. join less than 1/3 byzantine node
-4. make consensus on the DAG
+### Basic function
+every Client can publish and subscribe msgs at the same time (completed)
+### STEP 1 without transactions
+* Phase1
+2 nodes
+* Phase 2
+n normal nodes
+* Phase 3
+3 normal nodes and 1 byzantine node
+* Phase 4 
+6 normal nodes and 2 byzantine nodes
+* Phase 5
+more than 2n/3 normal nodes and less than n/3 byzantine nodes
+### STEP 2 with transactions
+* Phase1
+2 nodes
+* Phase 2
+n normal nodes
+* Phase 3
+3 normal nodes and 1 byzantine node
+* Phase 4 
+6 normal nodes and 2 byzantine nodes
+* Phase 5
+more than 2n/3 normal nodes and less than n/3 byzantine nodes
 
 ## Data structure
+* Client
+this a p2p node based on libp2p
+* Event
+```
+event {
+  parent : int64
+  self-parent : int64
+  timestamp : Timestamp
+  clientID : int64
+  stable : boolean
+}
+```
+* Message
 The structure of msg exchanged between nodes
 ```
 {
@@ -26,10 +53,12 @@ The structure of msg exchanged between nodes
 }
 ```
 we can use msg.data.toString() to check the content of msg, and use msg.from to get the sender.
+* Transacton
+TODO
 ## Database 
 Since our algorithm is based on graph theory, we consider using the graph database--neo4j.
 ### Interaction the neo4j with RESTful API
-
+TODO
 ### Commands can be used
 * Count all the nodes in the graph
 ```
@@ -52,9 +81,17 @@ CREATE (js:Person { name: "Johan", from: "Sweden", learn: "surfing" }),
 (rvb)-[:KNOWS]->(ally)
 ```
 * Find the the node with specific properties
-
+TODO
 * Find the double spend node
+TODO
+* Check if the node can see some nodes 
 
-* Check if the node can the some nodes 
+
+## TODO LIST
+1. p2p network with 100 nodes (completed)
+2. every node can publish and subscribe msgs at the same time (completed)
+3. draw the directed-acyclic-graph with the log of one node 
+3. join less than 1/3 byzantine node
+4. make consensus on the DAG
 
 
