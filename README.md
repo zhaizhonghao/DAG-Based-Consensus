@@ -37,6 +37,7 @@ event {
   self-parent : int64
   timestamp : Timestamp
   clientID : int64
+  hash : int64
   stable : boolean
 }
 ```
@@ -59,6 +60,8 @@ TODO
 Since our algorithm is based on graph theory, we consider using the graph database--neo4j.
 ### Interaction the neo4j with RESTful API
 TODO
+### Interacat with the neo4j using nodejs-driver
+
 ### Commands can be used
 * Count all the nodes in the graph
 ```

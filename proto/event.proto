@@ -1,9 +1,19 @@
 syntax = "proto3";
 
+
+message Ticket {
+    string  hash        =   1;
+    int32   clientID    =   2;
+}
 message Event {
-    string data = 1;
-    string selfParent = 2;
-    string parent = 3;
+    string  selfParent  =   1;
+    string  parent      =   2;
+    int32   timestamp   =   3;
+    int32   clientID    =   4;
+    int32   eventID     =   5;
+    bool    stable      =   6;
+    string  hash        =   7;
+    repeated Ticket tickets = 8;
 }
 
 message Message {
