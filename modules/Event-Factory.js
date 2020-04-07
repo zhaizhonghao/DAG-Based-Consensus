@@ -42,7 +42,6 @@ function calculateHash(event){
     let content = {
         selfParent : event.getSelfparent(),
         parent : event.getParent(),
-        timestamp : event.getTimestamp(),
         clientID : event.getClientid(),
         eventID : event.getEventid(),
         stable : event.getStable()

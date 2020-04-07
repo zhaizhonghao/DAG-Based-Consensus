@@ -28,27 +28,29 @@ exports.createInitEvent = async function(event,clientID){
     const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
     const session = driver.session();
     try {
-            let label = 'VIEW_'+clientID;
+            let label = createLabel(clientID);
             const result = await session.run(
                 `MERGE (a:`+label+` {parent: $parent,
                                 selfParent : $selfParent,
                                 clientID: $clientID,
-                                timestamp :$timestamp,
                                 stable : $stable,
                                 eventID:$eventID,
                                 hash: $hash}
                         ) 
+                ON CREATE SET a.timestamp = timestamp()
                 RETURN a`,
                 { 
                     selfParent : event.getSelfparent(),
                     parent : event.getParent(),
-                    timestamp : event.getTimestamp(),
                     clientID : event.getClientid(),
                     eventID : event.getEventid(),
                     stable : event.getStable(),
                     hash : event.getHash()
                 }
-            )        
+            )
+            const singleRecord = result.records[0]
+            const node = singleRecord.get(0)
+            return node.properties;       
         } finally {
         await session.close()
         }
@@ -56,29 +58,25 @@ exports.createInitEvent = async function(event,clientID){
         await driver.close()
 }
 
-exports.createEvent = async function(event){
+exports.createEvent = async function(event,clientID){
     const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
     const session = driver.session();
     try {
-            let label = 'VIEW_'+event.getClientid();
+            let label = createLabel(clientID);
             const result = await session.run(
                 `
-                MATCH (x{hash:$selfParent}),(y{hash:$parent})
-                CREATE (a:`+label+` {parent: $parent,
+                MERGE (a:`+label+` {parent: $parent,
                                 selfParent : $selfParent,
                                 clientID: $clientID,
-                                timestamp :$timestamp,
                                 stable : $stable,
-                                eventID:$eventID,
+                                eventID: $eventID,
                                 hash: $hash}
-                        ), 
-                        (a)-[:FROM]->(x),
-                        (a)-[:FROM]->(y)
+                        )
+                ON CREATE SET a.timestamp = timestamp()
                 RETURN a`,
                 { 
                     selfParent : event.getSelfparent(),
                     parent : event.getParent(),
-                    timestamp : event.getTimestamp(),
                     clientID : event.getClientid(),
                     eventID : event.getEventid(),
                     stable : event.getStable(),
@@ -92,11 +90,34 @@ exports.createEvent = async function(event){
         await driver.close()
 }
 
+exports.getInDegreeOfEvent = async function(event,clientID){
+    const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
+    const session = driver.session();
+    try {
+            let label = createLabel(clientID);
+            const result = await session.run(
+                `MATCH (x:`+label+`{hash:$hash}) 
+                    WITH SIZE(()-[]->(x)) AS inDegree
+                    return inDegree`,
+                { 
+                    hash:event.getHash()
+                }
+            )
+            const singleRecord = result.records[0]
+            const node = singleRecord.get(0)
+            return node.low-node.high;
+        } finally {
+            await session.close()
+            // on application exit:
+            await driver.close()
+        }
+}
+
 exports.isEventExist = async function(hash,clientID){
     const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
     const session = driver.session();
     try {
-            let label = 'VIEW_'+clientID;
+            let label = createLabel(clientID);
             const result = await session.run(
                 `MATCH (x:`+label+`{hash:$hash}) return count(x)`,
                 { 
@@ -135,36 +156,40 @@ exports.getEventByHash = async function(hash){
     // on application exit:
     await driver.close()
     }
-
 }
 
 
 
 //find the hash of event by clientID
-async function findLastestEventByClientID(clientID,driver){
+exports.getLatestEvent = async function(clientID){
+    const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
     const session = driver.session();
-    //find the latest event's id
-    let eventID = await countEventsByClient(clientID,driver);
-    //find the hash of the latest event by id and return
-    const result = await session.run(
-        `MATCH (x:Event {eventID: $eventID}) RETURN x`,
-        { eventID:eventID}
-    )
-    const singleRecord = result.records[0]
-    const node = singleRecord.get(0)
-    
-    return node.properties.hash;
+    try {
+        //find the latest event's id
+        let label = createLabel(clientID);
+        //find the hash of the latest event by id and return
+        const result = await session.run(
+            `MATCH (x:`+label+`{clientID:$clientID})
+                WITH count(x) AS num
+                MATCH (y:`+label+`{clientID:$clientID,eventID:num-1})
+                return y`,
+            {clientID:clientID}
+        )
+        const singleRecord = result.records[0]
+        const node = singleRecord.get(0)
+        return node.properties;
+
+    } finally {
+        await session.close()
+        // on application exit:
+        await driver.close()
+    }
 }
-//Some kind of wired
-async function countEventsByClient(clientID,driver){
-    const session = driver.session();
-    const result = await session.run(
-        `MATCH (x:Event {clientID: $clientID}) RETURN count(x)`,
-        { clientID:clientID}
-    )
-    const singleRecord = result.records[0]
-    const node = singleRecord.get(0)
-    return node.low-node.high;
+
+
+function createLabel(clientID){
+    let label = 'VIEW_'+clientID;
+    return label;
 }
 
 

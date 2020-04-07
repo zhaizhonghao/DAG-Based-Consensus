@@ -73,7 +73,20 @@ class Client {
           //check whether the parents of the event are in the node's graph
           //if the event has no parent and self-parent, then story the event
           if (event.getParent()=='' && event.getSelfparent()=='') {
-            await neo4jDB.createInitEvent(event,this.clientID);            
+            //store the event
+            await neo4jDB.createInitEvent(event,this.clientID);
+            let inDegree = await neo4jDB.getInDegreeOfEvent(event,this.clientID);
+            //create an new event to record the receiving
+            if (inDegree == 0) {
+              let lastEvent = await neo4jDB.getLatestEvent(this.clientID);
+              let newEvent = eventFactory.createEvent(
+                lastEvent.hash,
+                event.getHash(),
+                this.clientID,
+                lastEvent.eventID+1,
+                false);
+              await neo4jDB.createEvent(newEvent,this.clientID);
+            }
           }else{
             //check the event's parent
             let isParentExist = await neo4jDB.isEventExist(event.getParent(),this.clientID);

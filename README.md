@@ -105,6 +105,29 @@ match (x:Event) where id(x)=3
 create (y:Event{data:'Data4'}),(y)-[:FROM]->(x)
 return y
 ```
+* Using WITH
+```
+match (x:Event) 
+with count(x) as num
+create (y:Event{clientID:num+1})
+return y
+```
+* Using nested WITH
+```
+match (x:Event)
+with count(x) as num
+match (y:Event{clientID:num})
+with y.clientID as iden
+return iden
+```
+* Find the latest Event
+```
+match (x:Event)
+with count(x) as num
+match (y:Event{clientID:num})
+return y
+```
+
 
 ## TODO LIST
 1. p2p network with 100 nodes (completed)
