@@ -22,7 +22,7 @@ class Client {
     async initEvent(){
       console.log('init event');
       this.genesisEvent = eventFactory.createEvent('','',this.clientID,0,false);
-      await neo4jDB.createInitEvent(this.genesisEvent);
+      await neo4jDB.createInitEvent(this.genesisEvent,this.clientID);
     }
 
     getGenesisEvent(){
@@ -64,10 +64,28 @@ class Client {
       this.gossipNode.dial(peerInfo);
     }
 
-    subscribe(topic,callback){
-      this.gossipNode.pubsub.subscribe(topic,(msg)=>{
-        callback(msg);
-        });
+    subscribe(topic){
+      this.gossipNode.pubsub.subscribe(topic,async (msg)=>{
+        try {
+          //deserialize the received msg to Event
+          let event = eventFactory.deserializeBinaryToEvent(msg.data);
+          console.log(this.clientID+' get','From client',event.getClientid(),'with hash:',event.getHash());
+          //check whether the parents of the event are in the node's graph
+          //if the event has no parent and self-parent, then story the event
+          if (event.getParent()=='' && event.getSelfparent()=='') {
+            await neo4jDB.createInitEvent(event,this.clientID);            
+          }else{
+            //check the event's parent
+            let isParentExist = await neo4jDB.isEventExist(event.getParent(),this.clientID);
+            console.log('Is parent exist ?',event.getParent(),isParentExist);
+            //then check the event's self-parent
+            let isSelfParentExist = await neo4jDB.isEventExist(event.getSelfparent(),this.clientID);
+            console.log('Is self-parent exist ?',event.getSelfparent(),isSelfParentExist);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      });
     }
 
     publish(topic,msg){

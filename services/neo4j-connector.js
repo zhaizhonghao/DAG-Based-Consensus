@@ -24,13 +24,13 @@ exports.getGraph = async function(){
         await driver.close()
 }
 
-exports.createInitEvent = async function(event){
+exports.createInitEvent = async function(event,clientID){
     const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
     const session = driver.session();
     try {
-            let label = 'VIEW_'+event.getClientid();
+            let label = 'VIEW_'+clientID;
             const result = await session.run(
-                `CREATE (a:`+label+` {parent: $parent,
+                `MERGE (a:`+label+` {parent: $parent,
                                 selfParent : $selfParent,
                                 clientID: $clientID,
                                 timestamp :$timestamp,
@@ -92,14 +92,15 @@ exports.createEvent = async function(event){
         await driver.close()
 }
 
-exports.isEventExist = async function(event){
+exports.isEventExist = async function(hash,clientID){
     const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
     const session = driver.session();
     try {
+            let label = 'VIEW_'+clientID;
             const result = await session.run(
-                `MATCH (x{hash:$hash}) return count(x)`,
+                `MATCH (x:`+label+`{hash:$hash}) return count(x)`,
                 { 
-                    hash:event.getHash()
+                    hash:hash
                 }
             )
             const singleRecord = result.records[0]

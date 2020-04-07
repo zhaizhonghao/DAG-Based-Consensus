@@ -15,6 +15,10 @@ exports.createEvent = function(selfParent,parent,clientID,eventID,stable){
     return event;
 }
 
+exports.deserializeBinaryToEvent = function(bytes){
+    return Schema.Event.deserializeBinary(bytes);
+}
+
 /**
  * message Timestamp {
   // Represents seconds of UTC time since Unix epoch

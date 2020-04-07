@@ -1,6 +1,12 @@
-const Client = require('./modules/Client');
-const EventFactory = require('./modules/Event-Factory');
-const neo4jDB = require('./services/neo4j-connector');
+/**
+ * Author: Zhai
+ * Date : 2020/4/07
+ * Description:
+ * This demo shows a p2p network with 4 good nodes
+ * two nodes publish the serialized event and the others subscribe the event and deserialize it.
+ */
+const Client = require('./../modules/Client');
+const Schema = require('./../proto/event_pb');
 const NUM_OF_SUPER_CLIENT = 2;
 const NUM_OF_SIMPLE_CLIENT = 2;
 
@@ -30,11 +36,17 @@ const NUM_OF_SIMPLE_CLIENT = 2;
     }
 
     for (let j = 0; j < superClients.length; j++) {
-        superClients[j].subscribe('hashgraph');
+        superClients[j].subscribe('hashgraph',(msg)=>{
+            let event = Schema.Event.deserializeBinary(msg.data);
+            console.log('From client',event.getClientid(),'with hash:',event.getHash());
+        });
     }
 
     for (let i = 0; i < clients.length; i++) {
-        clients[i].subscribe('hashgraph');
+        clients[i].subscribe('hashgraph',(msg)=>{
+            let event = Schema.Event.deserializeBinary(msg.data);
+            console.log('From client',event.getClientid(),'with hash:',event.getHash());
+        });
     }
 
 
@@ -47,11 +59,7 @@ const NUM_OF_SIMPLE_CLIENT = 2;
             let msg = event.serializeBinary();
             clients[i].publish('hashgraph',msg); 
         }
-        for (let i = 0; i < superClients.length; i++) {
-            let event = superClients[i].getGenesisEvent();
-            let msg = event.serializeBinary();
-            superClients[i].publish('hashgraph',msg); 
-        }
+        
     },100);
     
     function stopInterval(){

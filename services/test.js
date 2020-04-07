@@ -14,7 +14,7 @@ const eventFactory = require('./../modules/Event-Factory')
     let result = await neo4jDB.getEventByHash(event.getHash());
     console.log(result);
 
-    let isExist = await neo4jDB.isEventExist(event);
+    let isExist = await neo4jDB.isEventExist(event.getHash(),2);
     console.log(isExist);
 
 })();
