@@ -1,7 +1,6 @@
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
 
 message Transaction {
-    google.protobuf.Timestamp timestap = 1;
+   int64 timestap = 1;
 }

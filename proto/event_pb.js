@@ -12,8 +12,6 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
-var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js');
-goog.object.extend(proto, google_protobuf_timestamp_pb);
 goog.exportSymbol('proto.Event', null, global);
 goog.exportSymbol('proto.Message', null, global);
 /**
@@ -92,7 +90,7 @@ proto.Event.toObject = function(includeInstance, msg) {
   var f, obj = {
     selfparent: jspb.Message.getFieldWithDefault(msg, 1, ""),
     parent: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    timestamp: (f = msg.getTimestamp()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
+    timestamp: jspb.Message.getFieldWithDefault(msg, 3, 0),
     clientid: jspb.Message.getFieldWithDefault(msg, 4, 0),
     eventid: jspb.Message.getFieldWithDefault(msg, 5, 0),
     stable: jspb.Message.getBooleanFieldWithDefault(msg, 6, false),
@@ -142,8 +140,7 @@ proto.Event.deserializeBinaryFromReader = function(msg, reader) {
       msg.setParent(value);
       break;
     case 3:
-      var value = new google_protobuf_timestamp_pb.Timestamp;
-      reader.readMessage(value,google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setTimestamp(value);
       break;
     case 4:
@@ -206,11 +203,10 @@ proto.Event.serializeBinaryToWriter = function(message, writer) {
     );
   }
   f = message.getTimestamp();
-  if (f != null) {
-    writer.writeMessage(
+  if (f !== 0) {
+    writer.writeInt64(
       3,
-      f,
-      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
+      f
     );
   }
   f = message.getClientid();
@@ -281,39 +277,20 @@ proto.Event.prototype.setParent = function(value) {
 
 
 /**
- * optional google.protobuf.Timestamp timestamp = 3;
- * @return {?proto.google.protobuf.Timestamp}
+ * optional int64 timestamp = 3;
+ * @return {number}
  */
 proto.Event.prototype.getTimestamp = function() {
-  return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 3));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
 };
 
 
 /**
- * @param {?proto.google.protobuf.Timestamp|undefined} value
+ * @param {number} value
  * @return {!proto.Event} returns this
-*/
+ */
 proto.Event.prototype.setTimestamp = function(value) {
-  return jspb.Message.setWrapperField(this, 3, value);
-};
-
-
-/**
- * Clears the message field making it undefined.
- * @return {!proto.Event} returns this
- */
-proto.Event.prototype.clearTimestamp = function() {
-  return this.setTimestamp(undefined);
-};
-
-
-/**
- * Returns whether this field is set.
- * @return {boolean}
- */
-proto.Event.prototype.hasTimestamp = function() {
-  return jspb.Message.getField(this, 3) != null;
+  return jspb.Message.setProto3IntField(this, 3, value);
 };
 
 

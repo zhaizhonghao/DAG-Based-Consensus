@@ -70,10 +70,8 @@ class Client {
         });
     }
 
-    publish(topic,interval,msg){
-      setInterval(() => {
+    publish(topic,msg){
         this.gossipNode.pubsub.publish(topic, Buffer.from(msg))
-      }, interval)
     }
 
     isStarted(){

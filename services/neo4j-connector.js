@@ -42,7 +42,7 @@ exports.createInitEvent = async function(event){
                 { 
                     selfParent : event.getSelfparent(),
                     parent : event.getParent(),
-                    timestamp : event.getTimestamp().getSeconds(),
+                    timestamp : event.getTimestamp(),
                     clientID : event.getClientid(),
                     eventID : event.getEventid(),
                     stable : event.getStable(),
@@ -78,7 +78,7 @@ exports.createEvent = async function(event){
                 { 
                     selfParent : event.getSelfparent(),
                     parent : event.getParent(),
-                    timestamp : event.getTimestamp().getSeconds(),
+                    timestamp : event.getTimestamp(),
                     clientID : event.getClientid(),
                     eventID : event.getEventid(),
                     stable : event.getStable(),

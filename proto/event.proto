@@ -1,10 +1,9 @@
 syntax = "proto3";
-import "google/protobuf/timestamp.proto";
 
 message Event {
     string  selfParent  =   1;
     string  parent      =   2;
-    google.protobuf.Timestamp   timestamp   =   3;
+    int64   timestamp   =   3;
     int32   clientID    =   4;
     int32   eventID     =   5;
     bool    stable      =   6;

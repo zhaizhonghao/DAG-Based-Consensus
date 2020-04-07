@@ -17,16 +17,24 @@ const transaction = new Schema.Transaction();
 }
  */
 
-const timeMS = Date.now();
+// const timeMS = Date.now();
 
-const timestamp = new proto.google.protobuf.Timestamp()
-timestamp.setSeconds(timeMS / 1000);
-timestamp.setNanos((timeMS % 1000) * 1e6);
+// const timestamp = new proto.google.protobuf.Timestamp()
+// timestamp.setSeconds(timeMS / 1000);
+// timestamp.setNanos((timeMS % 1000) * 1e6);
 
-transaction.setTimestap(timestamp);
-let result = transaction.getTimestap();
+// transaction.setTimestap(timestamp);
+// let result = transaction.getTimestap();
 
+// console.log(timestamp);
+// console.log(result);
+// console.log(result.getSeconds())
+// console.log(result.getNanos())
+
+// let binary = transaction.serializeBinary();
+// console.log(binary);
+let timestamp = Date.now();
 console.log(timestamp);
-console.log(result);
-console.log(result.getSeconds())
-console.log(result.getNanos())
+transaction.setTimestap(Date.now());
+let binary = transaction.serializeBinary();
+console.log(binary);

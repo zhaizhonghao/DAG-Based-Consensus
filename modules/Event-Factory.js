@@ -30,8 +30,7 @@ exports.createEvent = function(selfParent,parent,clientID,eventID,stable){
 }
  */
 function getCurrentTime(){
-    const timestamp = new proto.google.protobuf.Timestamp()
-    timestamp.setSeconds(Date.now() / 1000);
+    let timestamp = Date.now();
     return timestamp;
 }
 

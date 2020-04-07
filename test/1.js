@@ -1,5 +1,12 @@
-const Client = require('./modules/Client');
-const Schema = require('./proto/event_pb');
+/**
+ * Author: Zhai
+ * Date : 2020/4/07
+ * Description:
+ * This demo shows a p2p network with 4 good nodes
+ * one node publish the serialized event and the others subscribe the event and deserialize it.
+ */
+const Client = require('./../modules/Client');
+const Schema = require('./../proto/event_pb');
 const NUM_OF_SUPER_CLIENT = 2;
 const NUM_OF_SIMPLE_CLIENT = 2;
 
@@ -55,7 +62,8 @@ const NUM_OF_SIMPLE_CLIENT = 2;
         clearTimeout(myInterval);
     //myInterval.unref();
     }
-    setTimeout(stopInterval,600);
+    setTimeout(stopInterval,1000);
+    
     
     //clients[0].publish('hashgraph',1000,msg);
 })();
