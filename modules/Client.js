@@ -67,27 +67,42 @@ class Client {
 
     subscribe(topic){
       this.gossipNode.pubsub.subscribe(topic,async (msg)=>{
-        console.log(global.couter);
         try {
           //deserialize the received msg to Event
           let event = eventFactory.deserializeBinaryToEvent(msg.data);
-          console.log(this.clientID+' get','From client',event.getClientid(),'with hash:',event.getHash());
+          //console.log(this.clientID+' get','From client',event.getClientid(),'with hash:',event.getHash());
           //check whether the parents of the event are in the node's graph
           //if the event has no parent and self-parent, then story the event
           if (event.getParent()=='' && event.getSelfparent()=='') {
             //store the event
             await neo4jDB.createInitEvent(event,this.clientID);
-            let inDegree = await neo4jDB.getInDegreeOfEvent(event,this.clientID);
             //create an new event to record the receiving
-            if (inDegree == 0) {
-              let lastEvent = await neo4jDB.getLatestEvent(this.clientID);
-              let newEvent = eventFactory.createEvent(
-                lastEvent.hash,
-                event.getHash(),
-                this.clientID,
-                lastEvent.eventID+1,
-                false);
-              await neo4jDB.createEvent(newEvent,this.clientID);
+            let newEvent = eventFactory.createEvent(
+              '',
+              event.getHash(),
+              this.clientID,
+              -1,
+              false);
+            await neo4jDB.createEvent(newEvent,event);
+            //create parent edge for the event
+            await neo4jDB.createParentEdge(newEvent);
+            //get the num of self-created new events
+            let num = await neo4jDB.getNumOfNewEvents(this.clientID);
+            console.log('client has',this.clientID,'num is:',num);
+            //create the self-parent edge for the event
+            let events = await neo4jDB.getOtherNewEvents(this.clientID);
+            console.log('client',this.clientID,'get evets:',events.length);
+            let selfParentFlag;
+            for (let i = 0; i < events.length; i++) {
+              if(events[i].parent == newEvent.getParent()){
+                if (i == 0) {
+                  selfParentFlag = event.getParent();
+                  await neo4jDB.createSelfParentEdge(newEvent,selfParentFlag);
+                }else{
+                  selfParentFlag = events[i-1].parent;
+                  await neo4jDB.createSelfParentEdge(newEvent,selfParentFlag);
+                }
+              }
             }
           }else{
             //check the event's parent
@@ -98,7 +113,7 @@ class Client {
             console.log('Is self-parent exist ?',event.getSelfparent(),isSelfParentExist);
           }
         } catch (error) {
-          console.log(error);
+          //console.log(error);
         }
       });
     }

@@ -43,8 +43,7 @@ function calculateHash(event){
         selfParent : event.getSelfparent(),
         parent : event.getParent(),
         clientID : event.getClientid(),
-        eventID : event.getEventid(),
-        stable : event.getStable()
+        eventID : event.getEventid()
       }
       let hash = util.calculateHash(JSON.stringify(content));
       return hash;

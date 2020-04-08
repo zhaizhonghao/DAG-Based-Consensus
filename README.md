@@ -131,7 +131,10 @@ return y
 ```
 match (n:Person{name:'Johan'}) 
 with n
-foreach(ignoreMe in case when size(()-[]->(n)) > 0 then [1] else [] end | merge(n:Teacher) set n.age=30)
+foreach(ignoreMe in case when size(()-[]->(n)) > 0 then [1] else [] end |
+create (y:Person{name:'zhai'}),
+((n)-[:KNOWS]->(y))
+)
 ```
 
 ## TODO LIST
