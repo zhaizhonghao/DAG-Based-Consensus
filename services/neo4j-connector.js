@@ -92,6 +92,10 @@ exports.createEvent = async function(newEvent,parentEvent){
         }
         
 }
+/**
+ * since the event(A) is created for recording the coming event(B),
+ * A's parent is B
+ */
 exports.createParentEdge = async function(event){
     const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
     const session = driver.session();
@@ -114,6 +118,11 @@ exports.createParentEdge = async function(event){
         await driver.close()
         }
 }
+/**
+ * Since the event(A) for recording the coming event is created by client with clientID,
+ * we record the event ordered by timestamp, notice that if the event's indegree is not 0,
+ * it has been some event's self-parent
+ */
 exports.createSelfParentEdge = async function(event,selfParentFlag){
     console.log('selfParentFlag',selfParentFlag);
     const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
@@ -139,7 +148,10 @@ exports.createSelfParentEdge = async function(event,selfParentFlag){
         await driver.close()
         }
 }
-
+/**
+ * The function find the newly created events without self-parent,
+ * we use indegree = 0 to reprent that event
+ */
 exports.getOtherNewEvents = async function(clientID){
     const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
     const session = driver.session();
