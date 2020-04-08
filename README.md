@@ -127,7 +127,12 @@ with count(x) as num
 match (y:Event{clientID:num})
 return y
 ```
-
+* IF-ELSE logic 
+```
+match (n:Person{name:'Johan'}) 
+with n
+foreach(ignoreMe in case when size(()-[]->(n)) > 0 then [1] else [] end | merge(n:Teacher) set n.age=30)
+```
 
 ## TODO LIST
 1. p2p network with 100 nodes (completed)

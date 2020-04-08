@@ -8,6 +8,7 @@ const KadDHT = require('libp2p-kad-dht')
 const eventFactory = require('./Event-Factory');
 const neo4jDB = require('./../services/neo4j-connector');
 
+
 class Client {
 
     constructor(clientID){
@@ -66,6 +67,7 @@ class Client {
 
     subscribe(topic){
       this.gossipNode.pubsub.subscribe(topic,async (msg)=>{
+        console.log(global.couter);
         try {
           //deserialize the received msg to Event
           let event = eventFactory.deserializeBinaryToEvent(msg.data);

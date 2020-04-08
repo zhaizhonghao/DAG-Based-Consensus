@@ -65,7 +65,8 @@ exports.createEvent = async function(event,clientID){
             let label = createLabel(clientID);
             const result = await session.run(
                 `
-                MERGE (a:`+label+` {parent: $parent,
+                MERGE (a:`+label+` {
+                                parent: $parent,
                                 selfParent : $selfParent,
                                 clientID: $clientID,
                                 stable : $stable,
