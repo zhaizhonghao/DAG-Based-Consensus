@@ -99,8 +99,10 @@ class Client {
                   selfParentFlag = event.getParent();
                   await neo4jDB.createSelfParentEdge(newEvent,selfParentFlag);
                 }else{
-                  selfParentFlag = events[i-1].parent;
-                  await neo4jDB.createSelfParentEdge(newEvent,selfParentFlag);
+                  if(events[i].parent != events[i-1].parent){
+                    selfParentFlag = events[i-1].parent;
+                    await neo4jDB.createSelfParentEdge(newEvent,selfParentFlag);
+                  }
                 }
               }
             }
