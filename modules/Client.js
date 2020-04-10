@@ -88,10 +88,10 @@ class Client {
             await neo4jDB.createParentEdge(newEvent);
             //get the num of self-created new events
             let num = await neo4jDB.getNumOfNewEvents(this.clientID);
-            console.log('client has',this.clientID,'num is:',num);
+            //console.log('client has',this.clientID,'num is:',num);
             //create the self-parent edge for the event
             let events = await neo4jDB.getOtherNewEvents(this.clientID);
-            console.log('client',this.clientID,'get evets:',events.length);
+            //console.log('client',this.clientID,'get evets:',events.length);
             let selfParentFlag;
             for (let i = 0; i < events.length; i++) {
               if(events[i].parent == newEvent.getParent()){

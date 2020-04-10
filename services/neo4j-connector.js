@@ -1,8 +1,10 @@
 const neo4j = require('neo4j-driver');
+const util = require('./../modules/Crypto-Util');
 
 const uri = 'neo4j://localhost';
 const user = 'neo4j';
 const password = '1';
+
 
 exports.createInitEvent = async function(event,clientID){
     const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
@@ -57,7 +59,11 @@ exports.createEvent = async function(newEvent,parentEvent){
                     clientID : newEvent.getClientid(),
                     stable : newEvent.getStable()
                 }
-            )              
+            )
+            const singleRecord = result.records[0]
+            const node = singleRecord.get(0)
+            return node.properties;     
+            
         } finally {
         await session.close()
         // on application exit:
@@ -97,7 +103,6 @@ exports.createParentEdge = async function(event){
  * it has been some event's self-parent
  */
 exports.createSelfParentEdge = async function(event,selfParentFlag){
-    console.log('selfParentFlag',selfParentFlag);
     const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
     const session = driver.session();
     try {
@@ -109,13 +114,32 @@ exports.createSelfParentEdge = async function(event,selfParentFlag){
                     where size(()-[]->(y)) < 1
                     MERGE (x)-[:IFROM]->(y)
                     ON CREATE SET x.selfParent = y.timestamp
+                    RETURN x
                 `,
                 { 
                     clientID : event.getClientid(),
                     selfParentFlag : selfParentFlag,
                     parent : event.getParent()
                 }
-            )               
+            )
+            const singleRecord = result.records[0]
+            const node = singleRecord.get(0)
+            let tempEvent = node.properties;  
+            let hash = calculateHash(tempEvent.selfParent,tempEvent.parent,tempEvent.clientID);
+            const result2 = await session.run(
+                `
+                    MATCH (a:`+label+` {
+                        parent: $parent,
+                        clientID: $clientID}
+                    )
+                    SET a.hash=$hash
+                `,
+                { 
+                    parent : tempEvent.parent,
+                    clientID : tempEvent.clientID,
+                    hash: hash
+                }
+            )                 
         } finally {
         await session.close()
         // on application exit:
@@ -145,6 +169,29 @@ exports.getOtherNewEvents = async function(clientID){
                 events.push(record.get(0).properties)
             }
             return events;         
+        } finally {
+        await session.close()
+        // on application exit:
+        await driver.close()
+        }
+}
+
+exports.setHashOfEvent = async function(event){
+    const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
+    const session = driver.session();
+    try {
+            let label = createLabel(clientID);
+            const result = await session.run(
+                `
+                match (x:`+label+`{clientID:$clientID,parent:$parent}) 
+                SET x.hash = $hash
+                `,
+                {        
+                    clientID:event.getClientid(),
+                    parent : event.getParent(),
+                    hash : event.getHash()          
+                }
+            )     
         } finally {
         await session.close()
         // on application exit:
@@ -200,6 +247,18 @@ exports.isEventExist = async function(hash,clientID){
             await driver.close()
         }
 }
+
+
+function calculateHash(selfParent,parent,clientID){
+    let content = {
+        selfParent : selfParent,
+        parent : parent,
+        clientID : clientID
+      }
+      let hash = util.calculateHash(JSON.stringify(content));
+      return hash;
+} 
+
 
 
 

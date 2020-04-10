@@ -1,6 +1,4 @@
-const Client = require('./modules/Client');
-const EventFactory = require('./modules/Event-Factory');
-const neo4jDB = require('./services/neo4j-connector');
+const Client = require('./modules/Client-sync');
 const NUM_OF_SUPER_CLIENT = 2;
 const NUM_OF_SIMPLE_CLIENT = 2;
 
