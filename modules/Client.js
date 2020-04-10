@@ -81,7 +81,7 @@ class Client {
               '',
               event.getHash(),
               this.clientID,
-              -1,
+              0,
               false);
             await neo4jDB.createEvent(newEvent,event);
             //create parent edge for the event

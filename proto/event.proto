@@ -5,9 +5,8 @@ message Event {
     string  parent      =   2;
     int64   timestamp   =   3;
     int32   clientID    =   4;
-    int32   eventID     =   5;
-    bool    stable      =   6;
-    string  hash        =   7;
+    bool    stable      =   5;
+    string  hash        =   6;
 }
 
 message Message {
