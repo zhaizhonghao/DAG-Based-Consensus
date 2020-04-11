@@ -1,6 +1,6 @@
-const Client = require('./modules/Client-sync');
+const Client = require('./modules/Client');
 const NUM_OF_SUPER_CLIENT = 2;
-const NUM_OF_SIMPLE_CLIENT = 2;
+const NUM_OF_SIMPLE_CLIENT = 3;
 
 ;(async () => {
     let numOfClient = 0;

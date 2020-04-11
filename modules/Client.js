@@ -6,13 +6,16 @@ const PeerInfo = require('peer-info')
 const Gossipsub = require('libp2p-gossipsub')
 const KadDHT = require('libp2p-kad-dht')
 const eventFactory = require('./Event-Factory');
-const neo4jDB = require('./../services/neo4j-connector');
-
+const neo4jDB = require('../services/neo4j-connetor');
 
 class Client {
 
     constructor(clientID){
       this.clientID = clientID;
+      this.db = new neo4jDB.Neo4jDB();
+      this.cache = new Set([]);
+      this.sequence = [];
+      this.lock = true;
     }
 
     async init(){
@@ -23,7 +26,7 @@ class Client {
     async initEvent(){
       console.log('init event');
       this.genesisEvent = eventFactory.createEvent('','',this.clientID,0,false);
-      await neo4jDB.createInitEvent(this.genesisEvent,this.clientID);
+      await this.db.createInitEvent(this.genesisEvent,this.clientID);
     }
 
     getGenesisEvent(){
@@ -70,52 +73,55 @@ class Client {
         try {
           //deserialize the received msg to Event
           let event = eventFactory.deserializeBinaryToEvent(msg.data);
-          //console.log(this.clientID+' get','From client',event.getClientid(),'with hash:',event.getHash());
-          //check whether the parents of the event are in the node's graph
-          //if the event has no parent and self-parent, then story the event
-          if (event.getParent()=='' && event.getSelfparent()=='') {
-            //store the event
-            await neo4jDB.createInitEvent(event,this.clientID);
-            //create an new event to record the receiving
-            let newEvent = eventFactory.createEvent(
-              '',
-              event.getHash(),
-              this.clientID,
-              0,
-              false);
-            await neo4jDB.createEvent(newEvent,event);
-            //create parent edge for the event
-            await neo4jDB.createParentEdge(newEvent);
-            //get the num of self-created new events
-            let num = await neo4jDB.getNumOfNewEvents(this.clientID);
-            //console.log('client has',this.clientID,'num is:',num);
-            //create the self-parent edge for the event
-            let events = await neo4jDB.getOtherNewEvents(this.clientID);
-            //console.log('client',this.clientID,'get evets:',events.length);
-            let selfParentFlag;
-            for (let i = 0; i < events.length; i++) {
-              if(events[i].parent == newEvent.getParent()){
-                if (i == 0) {
-                  selfParentFlag = event.getParent();
-                  await neo4jDB.createSelfParentEdge(newEvent,selfParentFlag);
-                }else{
-                  if(events[i].parent != events[i-1].parent){
-                    selfParentFlag = events[i-1].parent;
-                    await neo4jDB.createSelfParentEdge(newEvent,selfParentFlag);
+          //only handler the event that is never received before
+          if(!this.cache.has(event.getHash())){
+            this.cache.add(event.getHash());
+            this.sequence.push(event.getHash());
+            //check whether the parents of the event are in the node's graph
+            //if the event has no parent and self-parent, then story the event
+            if (event.getParent()=='' && event.getSelfparent()=='') {
+              //store the event
+              await this.db.createInitEvent(event,this.clientID);
+
+              let interval = setInterval(async()=>{
+                try {             
+                  //FIFO
+                  if (this.lock && this.sequence[0] == event.getHash()) {
+                    //lock
+                    this.lock = !this.lock;
+                    let lastedEvent = await this.db.getLatestEvent(this.clientID);
+                    //console.log('lasted event1',lastedEvent);
+                    //create a new event to record the coming event
+                    let newEvent = eventFactory.createEvent(lastedEvent[0].hash,
+                                                  event.getHash(),
+                                                  this.clientID,
+                                                  lastedEvent[0].eventID+1,false);
+                    await this.db.createEvent(newEvent,this.clientID);
+                    if (this.clientID == 0) {
+                      console.log(this.clientID,this.sequence);
+                    }
+                    this.sequence.splice(0,1);
+                    //unlock
+                    this.lock = !this.lock;
+                    clearInterval(interval);
                   }
+                } catch (error) {
+                  console.log(error);
                 }
-              }
+
+              },1);
+            }else{
+              //check the event's parent
+              let isParentExist = await this.db.isEventExist(event.getParent(),this.clientID);
+              console.log('Is parent exist ?',event.getParent(),isParentExist);
+              //then check the event's self-parent
+              let isSelfParentExist = await this.db.isEventExist(event.getSelfparent(),this.clientID);
+              console.log('Is self-parent exist ?',event.getSelfparent(),isSelfParentExist);
             }
-          }else{
-            //check the event's parent
-            let isParentExist = await neo4jDB.isEventExist(event.getParent(),this.clientID);
-            console.log('Is parent exist ?',event.getParent(),isParentExist);
-            //then check the event's self-parent
-            let isSelfParentExist = await neo4jDB.isEventExist(event.getSelfparent(),this.clientID);
-            console.log('Is self-parent exist ?',event.getSelfparent(),isSelfParentExist);
           }
+
         } catch (error) {
-          //console.log(error);
+          console.log(error);
         }
       });
     }
