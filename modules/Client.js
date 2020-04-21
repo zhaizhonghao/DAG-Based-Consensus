@@ -7,6 +7,10 @@ const Gossipsub = require('libp2p-gossipsub')
 const KadDHT = require('libp2p-kad-dht')
 const eventFactory = require('./Event-Factory');
 const neo4jDB = require('../services/neo4j-connetor');
+const statusFactory = require('./Status-Factory');
+const PeerId = require('peer-id')
+const pipe = require('it-pipe')
+
 
 class Client {
 
@@ -117,13 +121,36 @@ class Client {
               else
               {
                 //step1: store the coming event temporarily
-                
+
                 //step2: send the lastest eventID of each client in its view to the pub peer
+                //get the latest eventID and insert into its current status
+                let res = await this.db.getLatestEventIDofEachClient(this.clientID);
+                let status = statusFactory.createStatus();
+                for (let i = 0; i < res.length; i++) {
+                  const element = res[i];
+                  let viewOfClient = statusFactory.createViewOfClient(element.clientID,element.eventID);
+                  status.addViews(viewOfClient);
+                }
+                //insert the address into the status
+                this.getPeerInfo().multiaddrs.forEach((ma) => status.addAddresses(ma.toString()));
+                let request = status.serializeBinary();
 
+                //extract the peerInfo of msg
+                let address = event.getAddressesList();
+                let peerId = PeerId.createFromB58String(msg.from);
+                let peerInfo = await PeerInfo.create(peerId);
+                for (let i = 0; i < address.length; i++) {
+                  const element = address[i];
+                  peerInfo.multiaddrs.add(element)
+                }
+                //dial the publisher and ask the missing events
+                const { stream: stream } = await this.gossipNode.dialProtocol(peerInfo, ['/missing'])
+                await pipe(
+                  [request],
+                  stream
+                )
+                //console.log(peerInfo);
               }
-
-
-
             }
           }
 
@@ -139,6 +166,21 @@ class Client {
 
     isStarted(){
       return this.gossipNode.isStarted();
+    }
+
+    handle(protocol){
+      this.gossipNode.handle(protocol, ({ stream }) => {
+        pipe(
+          stream,
+          async function (source) {
+            for await (const msg of source) {
+              let status = statusFactory.deserializeBinaryToStatus(msg._bufs[0]);
+              //To response the requested event
+              console.log(status);
+            }
+          }
+        )
+      })
     }
 
     async createNewEvent(event){

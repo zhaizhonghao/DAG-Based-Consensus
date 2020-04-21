@@ -42,11 +42,14 @@ const NUM_OF_SIMPLE_CLIENT = 3;
         console.log('has publish',counter++,'times');  
         for (let i = 0; i < clients.length; i++) {
             let event = clients[i].getGenesisEvent();
+            clients[i].getPeerInfo().multiaddrs.forEach((ma) => event.addAddresses(ma.toString()));
             let msg = event.serializeBinary();
             clients[i].publish('hashgraph',msg); 
         }
         for (let i = 0; i < superClients.length; i++) {
             let event = superClients[i].getGenesisEvent();
+            superClients[i].getPeerInfo().multiaddrs.forEach((ma) => event.addAddresses(ma.toString()));
+            //console.log(event.getAddressesList());
             let msg = event.serializeBinary();
             superClients[i].publish('hashgraph',msg); 
         }
@@ -58,10 +61,13 @@ const NUM_OF_SIMPLE_CLIENT = 3;
     }
     setTimeout(stopInterval,1000);
 
+    
+    clients[0].handle('/missing');
     //To show the latest event of the client 0 
     setInterval(()=>{
         let lastestEvent = clients[0].getLatestEvent();
         if (lastestEvent) {
+            clients[0].getPeerInfo().multiaddrs.forEach((ma) => lastestEvent.addAddresses(ma.toString()));
             let msg = lastestEvent.serializeBinary();
             clients[0].publish('hashgraph',msg); 
         }

@@ -124,6 +124,37 @@ class Neo4jDB {
             }
     }
 
+    async getLatestEventIDofEachClient(clientID){
+        const session = this.driver.session();
+        try {
+                let label = this.createLabel(clientID);
+                const result = await session.run(
+                    `
+                    match (x:`+label+`)
+                    return max(x.eventID),x.clientID
+                    `,
+                    {                                     
+                    }
+                )
+                let res = [] 
+                for (let i = 0; i < result.records.length; i++) {
+                    const singleRecord = result.records[i];
+                    let eventID = singleRecord.get(0);
+                    let client = singleRecord.get(1);
+                    let element = {
+                        clientID:client,
+                        eventID:eventID
+                    }
+                    res.push(element)
+                }
+                return res;
+            } catch(error){
+                console.log(error);
+            }finally {
+            await session.close()
+            }
+    }
+
     createLabel(clientID){
         let label = 'VIEW_'+clientID;
         return label;

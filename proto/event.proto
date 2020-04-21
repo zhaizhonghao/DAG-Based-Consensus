@@ -8,6 +8,8 @@ message Event {
     int32   eventID     =   5;
     bool    stable      =   6;
     string  hash        =   7;
+    
+    repeated string addresses = 8;
 }
 
 message Message {

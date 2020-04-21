@@ -137,6 +137,12 @@ create (y:Person{name:'zhai'}),
 )
 ```
 
+*Find the lastest EventID of each client
+```
+match (x:VIEW_0)
+return max(x.eventID),x.clientID
+```
+
 ## TODO LIST
 1. p2p network with 100 nodes (completed)
 2. every node can publish and subscribe msgs at the same time (completed)

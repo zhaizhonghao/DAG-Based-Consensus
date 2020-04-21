@@ -25,7 +25,7 @@ goog.exportSymbol('proto.Message', null, global);
  * @constructor
  */
 proto.Event = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.Event.repeatedFields_, null);
 };
 goog.inherits(proto.Event, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -56,6 +56,13 @@ if (goog.DEBUG && !COMPILED) {
    */
   proto.Message.displayName = 'proto.Message';
 }
+
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.Event.repeatedFields_ = [8];
 
 
 
@@ -94,7 +101,8 @@ proto.Event.toObject = function(includeInstance, msg) {
     clientid: jspb.Message.getFieldWithDefault(msg, 4, 0),
     eventid: jspb.Message.getFieldWithDefault(msg, 5, 0),
     stable: jspb.Message.getBooleanFieldWithDefault(msg, 6, false),
-    hash: jspb.Message.getFieldWithDefault(msg, 7, "")
+    hash: jspb.Message.getFieldWithDefault(msg, 7, ""),
+    addressesList: (f = jspb.Message.getRepeatedField(msg, 8)) == null ? undefined : f
   };
 
   if (includeInstance) {
@@ -158,6 +166,10 @@ proto.Event.deserializeBinaryFromReader = function(msg, reader) {
     case 7:
       var value = /** @type {string} */ (reader.readString());
       msg.setHash(value);
+      break;
+    case 8:
+      var value = /** @type {string} */ (reader.readString());
+      msg.addAddresses(value);
       break;
     default:
       reader.skipField();
@@ -234,6 +246,13 @@ proto.Event.serializeBinaryToWriter = function(message, writer) {
   if (f.length > 0) {
     writer.writeString(
       7,
+      f
+    );
+  }
+  f = message.getAddressesList();
+  if (f.length > 0) {
+    writer.writeRepeatedString(
+      8,
       f
     );
   }
@@ -363,6 +382,43 @@ proto.Event.prototype.getHash = function() {
  */
 proto.Event.prototype.setHash = function(value) {
   return jspb.Message.setProto3StringField(this, 7, value);
+};
+
+
+/**
+ * repeated string addresses = 8;
+ * @return {!Array<string>}
+ */
+proto.Event.prototype.getAddressesList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 8));
+};
+
+
+/**
+ * @param {!Array<string>} value
+ * @return {!proto.Event} returns this
+ */
+proto.Event.prototype.setAddressesList = function(value) {
+  return jspb.Message.setField(this, 8, value || []);
+};
+
+
+/**
+ * @param {string} value
+ * @param {number=} opt_index
+ * @return {!proto.Event} returns this
+ */
+proto.Event.prototype.addAddresses = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 8, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.Event} returns this
+ */
+proto.Event.prototype.clearAddressesList = function() {
+  return this.setAddressesList([]);
 };
 
 

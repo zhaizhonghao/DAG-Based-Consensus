@@ -5,6 +5,8 @@
 // const password = '1';
 // const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
 
+
+
 // // Create a company node
 // function addCompany (tx, name) {
 //     return tx.run('CREATE (a:Company {name: $name})', { name: name })

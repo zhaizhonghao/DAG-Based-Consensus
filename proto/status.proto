@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+message ViewOfClient {
+    int32 clientID = 1;
+    int32 eventID = 2;
+}
+
+message  Status{
+    repeated ViewOfClient views = 1;
+    repeated string addresses = 2;
+}
