@@ -144,4 +144,9 @@ create (y:Person{name:'zhai'}),
 3. join less than 1/3 byzantine node
 4. make consensus on the DAG
 
+## params
+|  N   | F  |
+|  :----  | :----  |
+|at least 2  | 1 pub / 100ms |
+
 

@@ -57,7 +57,16 @@ const NUM_OF_SIMPLE_CLIENT = 3;
     //myInterval.unref();
     }
     setTimeout(stopInterval,1000);
-    
+
+    //To show the latest event of the client 0 
+    setInterval(()=>{
+        let lastestEvent = clients[0].getLatestEvent();
+        if (lastestEvent) {
+            let msg = lastestEvent.serializeBinary();
+            clients[0].publish('hashgraph',msg); 
+        }
+        //clients[0].publish('hashgraph',)
+    },1000);    
     //clients[0].publish('hashgraph',1000,msg);
 })();
 

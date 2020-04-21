@@ -13,9 +13,12 @@ class Client {
     constructor(clientID){
       this.clientID = clientID;
       this.db = new neo4jDB.Neo4jDB();
+      //To filter the same events
       this.cache = new Set([]);
+      //To cache the coming events
       this.sequence = [];
       this.lock = true;
+      this.lastestEvent = null;
     }
 
     async init(){
@@ -29,8 +32,16 @@ class Client {
       await this.db.createInitEvent(this.genesisEvent,this.clientID);
     }
 
+    getClientId(){
+      return this.clientID;
+    }
+
     getGenesisEvent(){
       return this.genesisEvent;
+    }
+
+    getLatestEvent(){
+      return this.lastedEvent;
     }
 
     async createNode() {
@@ -82,41 +93,37 @@ class Client {
             if (event.getParent()=='' && event.getSelfparent()=='') {
               //store the event
               await this.db.createInitEvent(event,this.clientID);
+              //create an new event to record the coming event
+              await this.createNewEvent(event);
 
-              let interval = setInterval(async()=>{
-                try {             
-                  //FIFO
-                  if (this.lock && this.sequence[0] == event.getHash()) {
-                    //lock
-                    this.lock = !this.lock;
-                    let lastedEvent = await this.db.getLatestEvent(this.clientID);
-                    //console.log('lasted event1',lastedEvent);
-                    //create a new event to record the coming event
-                    let newEvent = eventFactory.createEvent(lastedEvent[0].hash,
-                                                  event.getHash(),
-                                                  this.clientID,
-                                                  lastedEvent[0].eventID+1,false);
-                    await this.db.createEvent(newEvent,this.clientID);
-                    if (this.clientID == 0) {
-                      console.log(this.clientID,this.sequence);
-                    }
-                    this.sequence.splice(0,1);
-                    //unlock
-                    this.lock = !this.lock;
-                    clearInterval(interval);
-                  }
-                } catch (error) {
-                  console.log(error);
-                }
-
-              },1);
             }else{
               //check the event's parent
               let isParentExist = await this.db.isEventExist(event.getParent(),this.clientID);
-              console.log('Is parent exist ?',event.getParent(),isParentExist);
+              console.log('Is parent exist ?',event.getParent(),isParentExist,'in client',this.clientID);
+              //if event's parent is missing, ask for its parent
+              
               //then check the event's self-parent
               let isSelfParentExist = await this.db.isEventExist(event.getSelfparent(),this.clientID);
-              console.log('Is self-parent exist ?',event.getSelfparent(),isSelfParentExist);
+              console.log('Is self-parent exist ?',event.getSelfparent(),isSelfParentExist,'in client',this.clientID);
+              //if event's self-parent is missing, ask for its self-parent
+
+              //if the parent and self-parent of the event is both existed, store the coming event and creating a new event to record it, otherwise ask for missing event
+              if (isParentExist&&isSelfParentExist) {
+                //store the coming event
+                await this.db.createEvent(event);
+                //create a new event to record it
+                this.createNewEvent(event);
+              }
+              else
+              {
+                //step1: store the coming event temporarily
+                
+                //step2: send the lastest eventID of each client in its view to the pub peer
+
+              }
+
+
+
             }
           }
 
@@ -132,6 +139,37 @@ class Client {
 
     isStarted(){
       return this.gossipNode.isStarted();
+    }
+
+    async createNewEvent(event){
+      let interval = setInterval(async()=>{
+        try {             
+          //FIFO
+          if (this.lock && this.sequence[0] == event.getHash()) {
+            //lock
+            this.lock = !this.lock;
+            let lastedEvent = await this.db.getLatestEvent(this.clientID);
+            //console.log('lasted event1',lastedEvent);
+            //create a new event to record the coming event
+            let newEvent = eventFactory.createEvent(lastedEvent[0].hash,
+                                          event.getHash(),
+                                          this.clientID,
+                                          lastedEvent[0].eventID+1,false);
+            await this.db.createEvent(newEvent,this.clientID);
+            this.lastedEvent = newEvent;
+            if (this.clientID == 0) {
+              console.log(this.clientID,this.sequence);
+            }
+            this.sequence.splice(0,1);
+            //TODO clear the cache
+            //unlock
+            this.lock = !this.lock;
+            clearInterval(interval);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      },1);
     }
 }
 

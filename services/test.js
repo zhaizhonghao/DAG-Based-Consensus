@@ -98,24 +98,29 @@
 //       )
 //   })
 
-var set1 = new Set([]);              //集合。不重复的元素集合，不存在键值对
-// set1.add("name");                   //添加集合
-// if(set1.has("name")){               //检测集合是否存在指定元素
-//     set1.delete("name");            //删除集合元素
-//     set1.clear();                   //清空集合元素
-//     console.log(set1.size);         //集合大小
+// var set1 = new Set([]);              //集合。不重复的元素集合，不存在键值对
+// // set1.add("name");                   //添加集合
+// // if(set1.has("name")){               //检测集合是否存在指定元素
+// //     set1.delete("name");            //删除集合元素
+// //     set1.clear();                   //清空集合元素
+// //     console.log(set1.size);         //集合大小
+// // }
+// var item = 'name';
+// var item2 = 'name1';
+// var item3 = 'name1';
+// if(!set1.has(item)){
+//     set1.add(item);
 // }
-var item = 'name';
-var item2 = 'name1';
-var item3 = 'name1';
-if(!set1.has(item)){
-    set1.add(item);
-}
-if(!set1.has(item2)){
-    set1.add(item2);
-}
-if(!set1.has(item3)){
-    set1.add(item3);
-}
+// if(!set1.has(item2)){
+//     set1.add(item2);
+// }
+// if(!set1.has(item3)){
+//     set1.add(item3);
+// }
 
-console.log(set1);
+// console.log(set1);
+
+// let result = 1>2 ? true : false;
+// console.log(result);
+
+

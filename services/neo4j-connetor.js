@@ -38,6 +38,7 @@ class Neo4jDB {
             session.close();
         }
     }
+
     async createEvent(event,clientID){
         let session = this.driver.session();
         try {
@@ -73,6 +74,7 @@ class Neo4jDB {
             session.close();
         }
     }
+    
     async getLatestEvent(clientID){
         const session = this.driver.session();
         try {
@@ -92,6 +94,29 @@ class Neo4jDB {
                     events.push(record.get(0).properties)
                 }
                 return events;         
+            } catch(error){
+                console.log(error);
+            }finally {
+            await session.close()
+            }
+    }
+
+    async isEventExist(eventHash,clientID){
+        const session = this.driver.session();
+        try {
+                let label = this.createLabel(clientID);
+                const result = await session.run(
+                    `
+                    MATCH (x:`+label+`{hash:$eventHash})
+                    return count(x) 
+                    `,
+                    {
+                        eventHash:eventHash                  
+                    }
+                ) 
+                const singleRecord = result.records[0];
+                const node = singleRecord.get(0);
+                return node.low-node.high == 0 ? false:true;
             } catch(error){
                 console.log(error);
             }finally {
