@@ -222,7 +222,7 @@ proto.ViewOfClient.prototype.setEventid = function(value) {
  * @private {!Array<number>}
  * @const
  */
-proto.Status.repeatedFields_ = [1,2];
+proto.Status.repeatedFields_ = [1,3];
 
 
 
@@ -257,7 +257,8 @@ proto.Status.toObject = function(includeInstance, msg) {
   var f, obj = {
     viewsList: jspb.Message.toObjectList(msg.getViewsList(),
     proto.ViewOfClient.toObject, includeInstance),
-    addressesList: (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f
+    nodeid: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    addressesList: (f = jspb.Message.getRepeatedField(msg, 3)) == null ? undefined : f
   };
 
   if (includeInstance) {
@@ -301,6 +302,10 @@ proto.Status.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 2:
       var value = /** @type {string} */ (reader.readString());
+      msg.setNodeid(value);
+      break;
+    case 3:
+      var value = /** @type {string} */ (reader.readString());
       msg.addAddresses(value);
       break;
     default:
@@ -340,10 +345,17 @@ proto.Status.serializeBinaryToWriter = function(message, writer) {
       proto.ViewOfClient.serializeBinaryToWriter
     );
   }
+  f = message.getNodeid();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
   f = message.getAddressesList();
   if (f.length > 0) {
     writer.writeRepeatedString(
-      2,
+      3,
       f
     );
   }
@@ -389,11 +401,29 @@ proto.Status.prototype.clearViewsList = function() {
 
 
 /**
- * repeated string addresses = 2;
+ * optional string nodeID = 2;
+ * @return {string}
+ */
+proto.Status.prototype.getNodeid = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.Status} returns this
+ */
+proto.Status.prototype.setNodeid = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * repeated string addresses = 3;
  * @return {!Array<string>}
  */
 proto.Status.prototype.getAddressesList = function() {
-  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 2));
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 3));
 };
 
 
@@ -402,7 +432,7 @@ proto.Status.prototype.getAddressesList = function() {
  * @return {!proto.Status} returns this
  */
 proto.Status.prototype.setAddressesList = function(value) {
-  return jspb.Message.setField(this, 2, value || []);
+  return jspb.Message.setField(this, 3, value || []);
 };
 
 
@@ -412,7 +442,7 @@ proto.Status.prototype.setAddressesList = function(value) {
  * @return {!proto.Status} returns this
  */
 proto.Status.prototype.addAddresses = function(value, opt_index) {
-  return jspb.Message.addToRepeatedField(this, 2, value, opt_index);
+  return jspb.Message.addToRepeatedField(this, 3, value, opt_index);
 };
 
 

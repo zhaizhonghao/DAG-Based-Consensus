@@ -155,13 +155,40 @@ class Neo4jDB {
             }
     }
 
+    async getMissingEvents(clientID,client,eventID){
+        const session = this.driver.session();
+        try {
+                let label = this.createLabel(clientID);
+                const result = await session.run(
+                    `
+                    MATCH (x:`+label+`{clientID:$client})
+                    WHERE x.eventID > $eventID
+                    return x
+                    `,
+                    {
+                        client:client,
+                        eventID:eventID
+                    }
+                )
+                let events = [];
+                for (let i = 0; i < result.records.length; i++) {
+                    const record = result.records[i];
+                    events.push(record.get(0).properties)
+                }
+                return events; 
+            } catch(error){
+                console.log(error);
+            }finally {
+            await session.close()
+            }
+    }
+
     createLabel(clientID){
         let label = 'VIEW_'+clientID;
         return label;
     }
 
     destory(){
-        this.session.close();
         this.driver.close();
     }
 

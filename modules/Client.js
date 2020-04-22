@@ -95,7 +95,7 @@ class Client {
             //check whether the parents of the event are in the node's graph
             //if the event has no parent and self-parent, then story the event
             if (event.getParent()=='' && event.getSelfparent()=='') {
-              //store the event
+              //store the coming event
               await this.db.createInitEvent(event,this.clientID);
               //create an new event to record the coming event
               await this.createNewEvent(event);
@@ -111,7 +111,8 @@ class Client {
               console.log('Is self-parent exist ?',event.getSelfparent(),isSelfParentExist,'in client',this.clientID);
               //if event's self-parent is missing, ask for its self-parent
 
-              //if the parent and self-parent of the event is both existed, store the coming event and creating a new event to record it, otherwise ask for missing event
+              //if the parent and self-parent of the event is both existed, store the coming event and creating a new event to record it,
+              // otherwise ask for missing event
               if (isParentExist&&isSelfParentExist) {
                 //store the coming event
                 await this.db.createEvent(event);
@@ -126,6 +127,7 @@ class Client {
                 //get the latest eventID and insert into its current status
                 let res = await this.db.getLatestEventIDofEachClient(this.clientID);
                 let status = statusFactory.createStatus();
+                status.setNodeid(this.gossipNode.peerInfo.id.toB58String());
                 for (let i = 0; i < res.length; i++) {
                   const element = res[i];
                   let viewOfClient = statusFactory.createViewOfClient(element.clientID,element.eventID);
@@ -149,7 +151,6 @@ class Client {
                   [request],
                   stream
                 )
-                //console.log(peerInfo);
               }
             }
           }
@@ -168,15 +169,65 @@ class Client {
       return this.gossipNode.isStarted();
     }
 
-    handle(protocol){
+    handleMissingRequest(protocol){
+      let clientID = this.clientID;
+      let db = this.db;
+      let node  = this.gossipNode;
       this.gossipNode.handle(protocol, ({ stream }) => {
         pipe(
           stream,
           async function (source) {
             for await (const msg of source) {
               let status = statusFactory.deserializeBinaryToStatus(msg._bufs[0]);
-              //To response the requested event
-              console.log(status);
+              //To get the requested missing event
+              let views = status.getViewsList();
+              let missingEvents = eventFactory.createMessage();
+              for (let i = 0; i < views.length; i++) {
+                const view = views[i];
+                console.log(view.getClientid(),view.getEventid());
+                let events = await db.getMissingEvents(clientID,view.getClientid(),view.getEventid())
+                for (let i = 0; i < events.length; i++) {
+                  const element = events[i];
+                  let newEvent = eventFactory.convertJSONToEvent(element);
+                  missingEvents.addEvents(newEvent);
+                }
+              }
+              //feedback
+              let feedback = missingEvents.serializeBinary();
+              //exact the peerInfo
+              let address = status.getAddressesList();
+              let peerId = PeerId.createFromB58String(status.getNodeid());
+              let peerInfo = await PeerInfo.create(peerId);
+              for (let i = 0; i < address.length; i++) {
+                const element = address[i];
+                peerInfo.multiaddrs.add(element)
+              }
+              //dial the publisher and feedback the missing events
+              const { stream: stream } = await node.dialProtocol(peerInfo, ['/feedback'])
+              await pipe(
+                [feedback],
+                stream
+              )
+            }
+          }
+        )
+      })
+    }
+
+    handleFeedback(protocol){
+      let clientID = this.clientID;
+      let db = this.db;
+      this.gossipNode.handle(protocol, ({ stream }) => {
+        pipe(
+          stream,
+          async function (source) {
+            for await (const msg of source) {
+              let feedback = eventFactory.deserializeBinaryToMessage(msg._bufs[0])
+              let events = feedback.getEventsList();
+              for (let i = 0; i < events.length; i++) {
+                const event = events[i];
+                console.log('view',clientID,event.getHash());
+              }
             }
           }
         )

@@ -7,5 +7,6 @@ message ViewOfClient {
 
 message  Status{
     repeated ViewOfClient views = 1;
-    repeated string addresses = 2;
+    string nodeID = 2;
+    repeated string addresses = 3;
 }

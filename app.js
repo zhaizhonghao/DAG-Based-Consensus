@@ -1,6 +1,6 @@
 const Client = require('./modules/Client');
 const NUM_OF_SUPER_CLIENT = 2;
-const NUM_OF_SIMPLE_CLIENT = 3;
+const NUM_OF_SIMPLE_CLIENT = 2;
 
 ;(async () => {
     let numOfClient = 0;
@@ -45,6 +45,7 @@ const NUM_OF_SIMPLE_CLIENT = 3;
             clients[i].getPeerInfo().multiaddrs.forEach((ma) => event.addAddresses(ma.toString()));
             let msg = event.serializeBinary();
             clients[i].publish('hashgraph',msg); 
+            clients[i].handleFeedback('/feedback');
         }
         for (let i = 0; i < superClients.length; i++) {
             let event = superClients[i].getGenesisEvent();
@@ -52,6 +53,7 @@ const NUM_OF_SIMPLE_CLIENT = 3;
             //console.log(event.getAddressesList());
             let msg = event.serializeBinary();
             superClients[i].publish('hashgraph',msg); 
+            superClients[i].handleFeedback('/feedback');
         }
     },100);
     
@@ -62,7 +64,7 @@ const NUM_OF_SIMPLE_CLIENT = 3;
     setTimeout(stopInterval,1000);
 
     
-    clients[0].handle('/missing');
+    clients[0].handleMissingRequest('/missing');
     //To show the latest event of the client 0 
     setInterval(()=>{
         let lastestEvent = clients[0].getLatestEvent();

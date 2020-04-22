@@ -15,8 +15,31 @@ exports.createEvent = function(selfParent,parent,clientID,eventID,stable){
     return event;
 }
 
+exports.convertJSONToEvent = function(jsonEvent){
+    let event = new Schema.Event();
+
+    event.setSelfparent(jsonEvent.selfParent);
+    event.setParent(jsonEvent.parent);
+    event.setTimestamp(jsonEvent.timestamp);
+    event.setClientid(jsonEvent.clientID);
+    event.setEventid(jsonEvent.eventID);
+    event.setStable(jsonEvent.stable);
+    event.setHash(jsonEvent.hash);
+
+    return event;
+}
+
+exports.createMessage = function(){
+    let message = new Schema.Message();
+    return message;
+}
+
 exports.deserializeBinaryToEvent = function(bytes){
     return Schema.Event.deserializeBinary(bytes);
+}
+
+exports.deserializeBinaryToMessage = function(bytes){
+    return Schema.Message.deserializeBinary(bytes);
 }
 
 /**
