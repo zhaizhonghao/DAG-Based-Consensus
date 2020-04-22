@@ -184,7 +184,6 @@ class Client {
               let missingEvents = eventFactory.createMessage();
               for (let i = 0; i < views.length; i++) {
                 const view = views[i];
-                console.log(view.getClientid(),view.getEventid());
                 let events = await db.getMissingEvents(clientID,view.getClientid(),view.getEventid())
                 for (let i = 0; i < events.length; i++) {
                   const element = events[i];
@@ -224,10 +223,13 @@ class Client {
             for await (const msg of source) {
               let feedback = eventFactory.deserializeBinaryToMessage(msg._bufs[0])
               let events = feedback.getEventsList();
+              //store these missing events
               for (let i = 0; i < events.length; i++) {
                 const event = events[i];
-                console.log('view',clientID,event.getHash());
+                await db.createEvent(event,clientID);
               }
+              //create an new event to record
+
             }
           }
         )

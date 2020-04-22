@@ -164,6 +164,7 @@ class Neo4jDB {
                     MATCH (x:`+label+`{clientID:$client})
                     WHERE x.eventID > $eventID
                     return x
+                    order by x.eventID
                     `,
                     {
                         client:client,
