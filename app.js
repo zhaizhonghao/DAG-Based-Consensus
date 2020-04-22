@@ -85,7 +85,6 @@ const NUM_OF_SIMPLE_CLIENT = 2;
                 superClients[i].publish('hashgraph',msg); 
             }
         }
-        //clients[0].publish('hashgraph',)
     },1000);    
     //clients[0].publish('hashgraph',1000,msg);
 })();

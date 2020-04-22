@@ -151,6 +151,7 @@ class Client {
                   [request],
                   stream
                 )
+
               }
             }
           }
@@ -179,7 +180,7 @@ class Client {
           async function (source) {
             for await (const msg of source) {
               let status = statusFactory.deserializeBinaryToStatus(msg._bufs[0]);
-              //To get the requested missing event
+              //STEP 1 : To get the requested missing event
               let views = status.getViewsList();
               let missingEvents = eventFactory.createMessage();
               for (let i = 0; i < views.length; i++) {
@@ -191,7 +192,7 @@ class Client {
                   missingEvents.addEvents(newEvent);
                 }
               }
-              //feedback
+              //STEP 2 : feedback
               let feedback = missingEvents.serializeBinary();
               //exact the peerInfo
               let address = status.getAddressesList();
@@ -213,11 +214,11 @@ class Client {
       })
     }
 
-    handleFeedback(protocol){
+    async handleFeedback(protocol){
       let clientID = this.clientID;
       let db = this.db;
-      this.gossipNode.handle(protocol, ({ stream }) => {
-        pipe(
+      this.gossipNode.handle(protocol, async({ stream }) => {
+        let comingEvent = await pipe(
           stream,
           async function (source) {
             for await (const msg of source) {
@@ -228,15 +229,18 @@ class Client {
                 const event = events[i];
                 await db.createEvent(event,clientID);
               }
-              //create an new event to record
-
+              return events[events.length-1];
             }
           }
         )
-      })
+        //console.log("comingEvent",comingEvent);
+        this.createNewEvent(comingEvent);
+      }
+      )
     }
 
     async createNewEvent(event){
+      console.log('coming',event)
       let interval = setInterval(async()=>{
         try {             
           //FIFO
