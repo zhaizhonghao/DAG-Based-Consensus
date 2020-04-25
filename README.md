@@ -155,4 +155,9 @@ return max(x.eventID),x.clientID
 |  :----  | :----  |
 |at least 2  | 1 pub / 100ms |
 
+## configuration
+|  Host Number |  operation System   | CPU  | Memory |
+|  :----  | :----  | :----  | :----  |
+| 8 |centos-release-7-7.1908.0.el7.centos.x86_64  | Intel(R) Xeon(R) CPU E5-2670 0 @ 2.60GHz x2 | 2083396 kB |
+
 
