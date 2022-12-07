@@ -26,7 +26,7 @@
     "crypto": "^1.0.1",
     "google-protobuf": "^3.12.2",
     "it-pipe": "^1.1.0",
-    "libp2p": "^0.27.8",
+    "libp2p": "^0.38.0",
     "libp2p-gossipsub": "^0.3.1",
     "libp2p-kad-dht": "^0.18.7",
     "libp2p-mplex": "^0.9.5",
